@@ -1,4 +1,5 @@
 **FORK from [einchan/sshchan](https://github.com/einchan/sshchan/)**
+**@(Modified)
 
 # SSHCHAN
 The server software that runs [ein.blue](http://ein.blue).

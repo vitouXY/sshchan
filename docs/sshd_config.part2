@@ -1,0 +1,65 @@
+
+
+
+
+PermitRootLogin prohibit-password
+PasswordAuthentication yes
+PermitEmptyPasswords no
+ChallengeResponseAuthentication no
+PrintMotd no
+
+# $ groupadd anon
+# $ useradd -d /srv/chan -m -g anon -N -c '@Chan user' anon
+# $ echo -en "anon\nanon" | passwd anon
+# $ ls -l /srv/chan
+
+# @ C H A N
+Port 66
+Port 22
+Compression yes
+
+# Deny users - Port 66       pi | alarm
+Match User pi, LocalPort 66
+    Banner none
+    DenyUsers pi
+Match User root, LocalPort 66
+    Banner none
+    DenyUsers root
+
+# @ C H A N : Private 22 ADMIN
+Match User anon, LocalPort 22
+    Banner none
+    DenyUsers anon
+
+    #HostKey /etc/ssh/ssh_host_rsa_key # < private
+    #AuthorizedKeysFile .ssh/authorized_keys # < pub
+    ##ForceCommand '/usr/bin/python3 /srv/chan/admin.py /srv/chan/atchan.conf'
+    #ForceCommand '/usr/local/bin/atchan_admin'
+
+# @ C H A N : Public 66 ANON
+Match User anon, LocalPort 66
+    #ChrootDirectory none
+
+    Banner /srv/chan/issue_atchan # BeforeLogin
+    ##ForceCommand '/usr/bin/python3 /srv/chan/sshchan.py /srv/chan/atchan.conf'
+    ForceCommand '/usr/local/bin/atchan_anon'
+    PasswordAuthentication yes
+    PubkeyAuthentication no
+    PermitTTY yes
+
+    #Banner /srv/chan/issue_atchan_err
+    #ForceCommand '/usr/bin/date'
+    #PasswordAuthentication no
+    #PubkeyAuthentication no
+    #PermitTTY no
+
+    PermitEmptyPasswords no
+    AllowTcpForwarding no
+    X11Forwarding no
+    GatewayPorts no
+    PermitTunnel no
+
+# # /etc/init.d/sshd restart
+# @ C H A N
+
+

@@ -1,5 +1,9 @@
 **FORK from [einchan/sshchan](https://github.com/einchan/sshchan/)**
-**@(Modified)
+
+<Modified>: `mkdir -p /srv/chan/data/{boards,motd}/`
+
+<Modified>: `ls -l /srv/chan/*`
+
 
 # SSHCHAN
 The server software that runs [ein.blue](http://ein.blue).

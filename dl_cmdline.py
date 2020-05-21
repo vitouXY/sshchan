@@ -1,3 +1,13 @@
+#!/usr/bin/env python
+# -*- coding: UTF-8 -*-
+import helptexts
+import console
+import readline
+import getpass
+import sys
+
+import platform
+
 class DisplayLegacyCmdline:
     """
     This class defines how the CLI operates.
@@ -12,6 +22,7 @@ class DisplayLegacyCmdline:
         self.config = config
         self.dl = dl # DisplayLegacy functions
         self.marker = marker
+        self.userguide = helptexts.display_legacy_userguide
 
     def run(self):
         self.dl.display_home()
@@ -43,8 +54,8 @@ class DisplayLegacyCmdline:
                     return False
                 self.cmdline_reply(["re"])
             else:
-                print(self.c.RED + "Too few or too many arguments provided."\
-                    + self.c.BLACK)
+                print(self.c.RED + "Muy pocos o demasiados argumentos proporcionados."\
+                    + self.c.BLACK) # Too few or too many arguments provided.
                 self.dl.display_help(cmd="re")
                 return False
 
@@ -73,8 +84,8 @@ class DisplayLegacyCmdline:
             self.board.thread = 0
             return True
         if self.board.name == '':
-            print(self.c.RED + "You are not on a board. Use \'cd\' to change boards."\
-            + self.c.BLACK)
+            print(self.c.RED + "No estas en un tablon. Usa \'cd\' para cambiar de tablon."\
+            + self.c.BLACK) # You are not on a board. Use 'cd' to change boards.
             return False
 
         try:
@@ -84,7 +95,7 @@ class DisplayLegacyCmdline:
                 self.dl.layout()
 
         except ValueError:
-            print(self.c.RED + cmd_argv[1], "is not a thread or post number.")
+            print(self.c.RED + cmd_argv[1], "no es un hilo o un numero de publicacion.") # is not a thread or post number.
             self.dl.display_help(cmd="view")
 
     def cmdline(self):
@@ -94,14 +105,22 @@ class DisplayLegacyCmdline:
             prompt_thread = ''
         else:
             prompt_thread = str(self.board.thread)
-        print(self.c.BLUE + self.config.prompt + "/" + self.board.name + "/" +\
-            self.c.PURPLE + prompt_thread + self.c.BLUE + "/>" + self.c.BLACK, end=' ')
 
-        cmd = str(input())
+        if self.config.display_legacy in ("True", "true"): 
+            # tab version from console.py
+            ctab = console.Console(self.c.BLUE + self.config.prompt + "/" + self.board.name + "/" + self.c.PURPLE + prompt_thread + self.c.BLUE + "/>" + self.c.BLACK + ' ') #(">>> ")
+            ctab.autocomplete(["exit", "help", "cd", "ls", "page", "re", "refresh", "rt", "view"])
+            cmd = str(ctab.console(intro="", autocomplete=True))
+        else:
+            print(self.c.BLUE + self.config.prompt + "/" + self.board.name + "/" +\
+                self.c.PURPLE + prompt_thread + self.c.BLUE + "/>" + self.c.BLACK, end=' ')
+            cmd = str(input())
+
         cmd = self.marker.esc(cmd)
         cmd_argv = cmd.split()
 
         if len(cmd_argv) == 0:
+            #self.dl.layout()
             return False
 
         if cmd_argv[0] in ("exit", "quit", "q"):
@@ -109,14 +128,34 @@ class DisplayLegacyCmdline:
 
         elif cmd_argv[0] in ("h", "help"):
             if len(cmd_argv) == 2:
-                #if cmd_argv[1] == "user":
-                    #self.dl.laprint(self.userguide) # This is broken i don't know why it's here. There's no such thing as self.userguide, and what is a user anyway?
-                    #self.dl.layout()
-                #else:
-                self.dl.display_help(cmd=str(cmd_argv[1]))
+                if cmd_argv[1] == "user":
+                    self.dl.laprint(self.userguide) # This is broken i don't know why it's here. There's no such thing as self.userguide, and what is a user anyway?
+                    self.dl.layout()
+                else:
+                    if cmd_argv[1] in ("exit", "quit", "q"):
+                        cmd_argv[1] = 'exit'
+                    elif cmd_argv[1] in ("h", "help"):
+                        cmd_argv[1] = 'help'
+                    elif cmd_argv[1] in ("b", "board", "cd"):
+                        cmd_argv[1] = 'cd'
+                    elif cmd_argv[1] in ("ls", "list"):
+                        cmd_argv[1] = 'ls'
+                    elif cmd_argv[1] in ("page", "p"):
+                        cmd_argv[1] = 'page'
+                    elif cmd_argv[1] in ("re", "reply"):
+                        cmd_argv[1] = 're'
+                    elif cmd_argv[1] in ("refresh", "rb"):
+                        cmd_argv[1] = 'refresh'
+                    elif cmd_argv[1] in ("rt"):
+                        cmd_argv[1] = 'rt'
+                    elif cmd_argv[1] in ("v", "view"):
+                        cmd_argv[1] = 'view'
+                    elif cmd_argv[1] in ("V", "version"):
+                        cmd_argv[1] = 'V'
+                    self.dl.display_help(cmd=str(cmd_argv[1]))
             else:
                 self.dl.display_help()
-                print("\nType \'help user\' for a guide to sshchan.")
+                print("\nEscriba \'help user\' para obtener una mini-guia de @Chan.") # Type 'help user' for a guide to @Chan.
 
         elif cmd_argv[0] in ("b", "board", "cd"):
             if len(cmd_argv) > 1:
@@ -126,22 +165,22 @@ class DisplayLegacyCmdline:
 
         elif cmd_argv[0] in ("ls", "list"):
             self.dl.buf = ''
-            self.dl.laprint(self.c.GREEN + "BOARDS:" + self.c.BLACK)
+            self.dl.laprint(self.c.GREEN + "TABLONES:" + self.c.BLACK) # BOARDS:
             self.dl.laprint(self.board.list_boards())
             self.dl.layout()
 
         elif cmd_argv[0] in ("page", "p"):
             if self.board.name == "":
-                print(self.c.RED + "You are not on a board yet. Use \'cd\' to change boards." + self.c.BLACK)
+                print(self.c.RED + "Aun no estas en un tablon. Usa \'cd\' para cambiar de tablon." + self.c.BLACK) # You are not on a board yet. Use 'cd' to change boards.
                 self.dl.display_help()
             elif len(cmd_argv) < 2:
-                print(self.c.RED + "You must give the number of the page you wish to view!" + self.c.BLACK)
+                print(self.c.RED + "Debes dar el numero de la pagina que deseas ver!" + self.c.BLACK) # You must give the number of the page you wish to view!
                 self.dl.display_help()
             else:
                 try:
                     self.cmdline_board(board=self.board.name, page=int(cmd_argv[1]))
                 except ValueError:
-                    print(self.c.RED + cmd_argv[1], "is not a number.")
+                    print(self.c.RED + cmd_argv[1], "no es un numero.") # is not a number.
                     self.dl.display_help(cmd="page")
                     
 
@@ -160,7 +199,17 @@ class DisplayLegacyCmdline:
         elif cmd_argv[0] in ("v", "view"):
             self.cmdline_view(cmd_argv)
 
+        elif cmd_argv[0] in ("V", "version"):
+            self.dl.buf = ''
+            #self.dl.la
+            print("@Chan 0.1-" + self.config.version +" for Python3/" + platform.system())
+            print("\nBifurcacion de: sshchan <https://github.com/einchan/sshchan/>")
+            print("\nchibi <http://neetco.de/chibi>\
+                \nCopyright (c) 2015 makos <https://github.com/makos> under GNU GPL v2.")
+            #self.dl.laprint('')
+            #self.dl.layout()
+
         else:
-            print(self.c.RED + "Command \'" + cmd_argv[0] + "\' not found." + self.c.BLACK)
+            print(self.c.RED + "No se encontro comando \'" + cmd_argv[0] + "\'." + self.c.BLACK) # Command '++' not found.
             self.dl.display_help()
 

@@ -1,5 +1,7 @@
-#!/usr/bin/env python3
-
+#!/usr/bin/env python
+# -*- coding: UTF-8 -*-
+#!/usr/bin/python3
+#qpy:console
 """
 Main file of sshchan, it ties up other files together.
 User interacts with the chan through the use of a commandline.
@@ -15,16 +17,22 @@ under GNU GPL v2, see LICENSE for details
 import logging
 import sys
 import os
-import urwid
+#import urwid
 import re
 # sshchan imports
 # import admin
 import config
 from boards import Board
 from chan_mark import Marker
-import display
+#import display
 from display_legacy import DisplayLegacy
 from dl_cmdline import DisplayLegacyCmdline
+
+import signal
+def keyboardInterruptHandler(signal, frame ):
+    print( "KeyboardInterrupt (ID: {}) has been caught. Cleaning up..." . format(signal ))
+    exit(0)
+signal.signal(signal.SIGINT, keyboardInterruptHandler)
 
 logging.basicConfig(
     filename="log",
@@ -32,26 +40,41 @@ logging.basicConfig(
     level=logging.DEBUG)
 
 if __name__ == "__main__":
-    if len(sys.argv) > 1:
-        if os.path.exists(sys.argv[1]):
-            cfg = config.Config(sys.argv[1])
+    try:
+        if len(sys.argv) > 1:
+            if os.path.exists(sys.argv[1]):
+                cfg = config.Config(sys.argv[1])
+            else:
+                # Change it so it at least tries to read default path/values first.
+                print("Ruta de archivo de configuracion no valida.") # Invalid configuration file path.
+                cfg = config.Config()
         else:
-            # Change it so it at least tries to read default path/values first.
-            print("Invalid configuration file path.")
             cfg = config.Config()
-    else:
-        cfg = config.Config()
+    except OSError:
+        exit(0)
 
     board = Board(config=cfg)
     c = config.Colors() # terminal colors object
     marker = Marker()
     dl = DisplayLegacy(cfg, board, c, marker)
 
-    # Command line legacy interface - used by default
-    if cfg.display_legacy in ("True", "true"): 
+
+    import pkgutil
+    mloader = pkgutil.find_loader( 'urwid' )
+    mfound = mloader is not None
+    if mfound == False:
         screen = DisplayLegacyCmdline(board, c, cfg, dl, marker)
         screen.run()
-    # urwid GUI
     else:
-        screen = display.Display(cfg, board)
-        screen.run()
+        # Command line legacy interface - used by default
+        if cfg.display_legacy in ("True", "true"): 
+            screen = DisplayLegacyCmdline(board, c, cfg, dl, marker)
+            screen.run()
+        # urwid GUI
+        else:
+            import urwid
+            import display
+
+            screen = display.Display(cfg, board)
+            screen.run()
+

@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+# -*- coding: UTF-8 -*-
 """
 Legacy (basic CLI) display module for sshchan.
 
@@ -5,6 +7,7 @@ Copyright (c) 2016
 chibi <http://neetco.de/chibi>, makos <https://github.com/makos/>
 under GNU GPL v2, see LICENSE for details
 """
+# Edit port display_connected()
 import math
 import os
 import re
@@ -15,6 +18,8 @@ from sys import exit
 
 # Help texts and user guides
 import helptexts
+
+from pdata import getrandfile, getrandname, replacemotd, replacespa
 
 THREADSPERPAGE = 10 # TODO - Move to the conf file
 
@@ -33,13 +38,13 @@ class DisplayLegacy:
         self.userguide = helptexts.display_legacy_userguide
 
     def display_home(self):
-        self.laprint(self.c.RED + 'Welcome to ' + self.c.YELLOW + 'sshchan!\
-            \n===========' + self.c.RED + '========' + self.c.BLACK)
-        self.laprint(self.c.GREEN + 'SERVER:\t' + self.c.BLACK + self.config.server_name)
-        self.laprint(self.c.GREEN + 'MOTD:' + self.c.BLACK)
+        self.laprint(self.c.RED + 'Bienvenido a ' + self.c.YELLOW + '@Chan!\
+            \n=============' + self.c.RED + '=========' + self.c.BLACK) # Welcome to 
+        self.laprint(self.c.GREEN + 'SERVIDOR:\t' + self.c.BLACK + self.config.server_name)
+        self.laprint(self.c.GREEN + 'MOTD:' + self.c.BLACK) # MOTD:
         self.print_motd()
         # Listing boards
-        self.laprint(self.c.GREEN + "BOARDS:" + self.c.BLACK)
+        self.laprint(self.c.GREEN + "TABLEROS:" + self.c.BLACK) # BOARDS:
         self.laprint(self.board.list_boards())
         self.display_connected()
         self.layout()
@@ -96,36 +101,44 @@ class DisplayLegacy:
     def print_motd(self):
         """Prints the MOTD."""
         try:
-            m = open(self.config.motd)
+            #m = open(self.config.motd)
+            m = open(getrandfile(self.config.motd))
             motdbuf = m.read()
+            motdbuf = replacemotd(motdbuf, self.config.port_ssh)
             m.close()
             self.laprint(motdbuf)     
         except FileNotFoundError:
-            self.laprint("\'Shitposting was never the same\' --satisfied sshchan user")
+            self.laprint("\'La publicacion de mierda nunca fue lo mismo\' --usuario de @Chan satisfecho") # 'Shitposting was never the same' --satisfied @Chan user
 
     def display_connected(self):
-        """Prints out the number of people currently connected to the ssh port."""
+        """Prints out the number of people currently connected to the ssh port. edit_port sshd_config"""
         try:
-            connected = subprocess.check_output("netstat -atn | grep ':22' | grep 'ESTABLISHED' | wc -l", shell=True)
+            # self.config.port_ssh
+            #connected = subprocess.check_output("netstat -atn | grep ':22' | grep 'ESTABLISHED' | wc -l", shell=True)
+            #connected = subprocess.check_output("netstat -atn | grep ':" + self.config.port_ssh + "' | grep 'ESTABLISHED' | wc -l", shell=True)
+            connected = subprocess.check_output("netstat -atn | grep 'ESTABLISHED' | awk '{print $4}' | grep ':" + self.config.port_ssh + "' | wc -l", shell=True)
+            #connected = subprocess.check_output("w | awk '{print $1}' | grep 'anon' | wc -l", shell=True)
             connected = int(connected)
-            self.laprint(self.c.YELLOW + "Connected: " + self.c.BLACK + str(connected))
+            self.laprint(self.c.YELLOW + "Conectado: " + self.c.BLACK + str(connected)) # Connected:
         except:
-            self.laprint(self.c.YELLOW + "Connected: " + self.c.BLACK + "It is a mystery")
+            self.laprint(self.c.YELLOW + "Conectado: " + self.c.BLACK + "Es un misterio") # Connected: ++ It is a mystery
 
     def display_help(self, cmd=None):
         """Display either the entire help message or just the help
         for a particular command (cmd)"""
         if cmd == None:
+            # for : help
             for key in sorted(self.helptext.keys()):
                 print(self.c.GREEN + self.helptext[key][0] + self.c.YELLOW, \
                     self.helptext[key][1] + "\n" + self.c.BLACK + self.helptext[key][2])
             print(helptexts.markup_helptext)
         else:
+            # for : help <cmd>
             try:
                 print(self.c.GREEN + self.helptext[cmd][0] + self.c.YELLOW, \
                     self.helptext[cmd][1] + "\n" + self.c.BLACK + self.helptext[cmd][2])
             except KeyError:
-                print(self.c.RED + "Help for that command could not be found." + self.c.BLACK)
+                print(self.c.RED + "No se pudo encontrar ayuda para ese comando." + self.c.BLACK) # Help for that command could not be found.
 
     def convert_time(self, stamp):
         """Convert UNIX timestamp to regular date format.
@@ -151,7 +164,7 @@ class DisplayLegacy:
     def display_board(self, page=1):
         """Displays the OPs of the threads on a board."""
         if self.board.name == '':
-            print(self.c.RED + "You are not on a board." + self.c.BLACK)
+            print(self.c.RED + "No estas en un tablon." + self.c.BLACK) # You are not on a board.
             self.display_help(cmd="cd")
             return False
 
@@ -189,9 +202,9 @@ class DisplayLegacy:
         self.layout()
 
         if hidden_pages >= last_page:
-            print(self.c.RED + "No more pages to display")
+            print(self.c.RED + "No hay mas paginas para mostrar") # No more pages to display
         elif hidden_pages > 0:
-            print(self.c.RED + str(hidden_pages) + " more pages, enter " + self.c.GREEN + "'p " + str((page + 1)) + "'" + self.c.RED + " to see the next page.")
+            print(self.c.RED + str(hidden_pages) + " mas paginas, ingrese " + self.c.GREEN + "'p " + str((page + 1)) + "'" + self.c.RED + " para ver la siguiente pagina.") # ++ more pages, enter 'p ++'  to see the next page.
 
 
     def display_thread(self, thread_id, index=None, op_only=False, replies=1000):
@@ -210,7 +223,7 @@ class DisplayLegacy:
         thread_pos = self.board.thread_exists(int(thread_id))
 
         if thread_pos == -1: # -1 is the false return value for thread_exists()
-            print(self.c.RED + 'Thread not found.' + self.c.BLACK)
+            print(self.c.RED + 'Hilo no encontrado.' + self.c.BLACK) # Thread not found.
             return False
         
         else:
@@ -229,7 +242,7 @@ class DisplayLegacy:
 
         for reply in posts: # reversed() would the newest posts appear at the bottom
             if len(reply) == 3: # The old json format - just date, post_no and post_text
-                name = "Anonymous"
+                name = getrandname() #"Anonymous"
                 date = self.convert_time(int(reply[0]))
                 post_no = str(reply[1])
                 post_text = str(reply[2]).rstrip()
@@ -250,8 +263,8 @@ class DisplayLegacy:
             op = False
 
         if op_only == True:
-            self.laprint(self.c.GREEN + str(len(thread) - 3), "replies \
-hidden. Type \'v " + str(thread_id) + "\' to view them.\n")
+            self.laprint(self.c.GREEN + str(len(thread) - 3), "respuestas \
+ocultas. Escribe \'v " + str(thread_id) + "\' para verlos.\n") # ++ replies hidden. Type 'v ++' to view them.
 
         return True
 
@@ -259,16 +272,17 @@ hidden. Type \'v " + str(thread_id) + "\' to view them.\n")
         """Get post from the user and send it to addPost()."""
         # Get name. Default is the username of the controlling user of
         # the sshchan process.
-        name = str(input("Name: [default: " + self.c.YELLOW + \
-self.config.username + self.c.BLACK + "] "))
+        name = str(input("Nombre: [por defecto: " + self.c.YELLOW + \
+self.config.username + self.c.BLACK + "] ")) # Name: [default:
         if name == '':
             name = self.config.username
         else:
+            name = replacespa(name)
             name = self.trip_convert(name)
 
         # Get the post text.
-        print("Post text:\n" + self.c.GREEN + \
-"[Hint: leave a blank line to complete the post.]" + self.c.BLACK)
+        print("Publicar texto:\n" + self.c.GREEN + \
+"[Sugerencia: deja una linea en blanco para completar la publicacion.]" + self.c.BLACK) # Post text: ++ [Hint: leave a blank line to complete the post.]
         post_text = ''
         blanks = 0 # How many blank lines have been entered
 
@@ -284,16 +298,19 @@ self.config.username + self.c.BLACK + "] "))
 
         # If the user did not post anything, show an error.
         if post_text == '\n':
-            print(self.c.RED + "You have made an empty post. Scrapping..." \
-+ self.c.BLACK)
+            print(self.c.RED + "Has hecho un mensaje vacio. Scrapping..." \
++ self.c.BLACK) # You have made an empty post. Scrapping...
             return False
 
+        post_text = replacespa(post_text)
         post_text = post_text.rstrip()
 
         if thread_id == -1: # If a new thread is to be posted
-            subject = str(input("Subject: "))
+            subject = str(input("Titulo: ")) # Subject:
         else:
             subject = ""
+
+        subject = replacespa(subject)
 
         name = self.marker.esc(name)
         subject = self.marker.esc(subject)
@@ -302,6 +319,6 @@ self.config.username + self.c.BLACK + "] "))
         success = self.board.add_post(post_text, name=name, \
                   subject=subject, thread_id=thread_id)
         if success == True:
-            print(self.c.GREEN + "Post successful!" + self.c.BLACK)
+            print(self.c.GREEN + "Publicacion exitosa!" + self.c.BLACK) # Post successful!
         else:
-            print(self.c.RED + "Post failed." + self.c.BLACK)
+            print(self.c.RED + "Publicacion fallida." + self.c.BLACK) # Post failed.

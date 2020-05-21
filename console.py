@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+# -*- coding: UTF-8 -*-
 """
 console.py
 Adam Weidner 2012
@@ -14,6 +16,7 @@ import sys
 
 class Console:
 
+    #def __init__(self, prompt=">>> "):
     def __init__(self, prompt=">>> "):
         """Initialize the prompt, that's about it"""
         self.prompt = prompt
@@ -91,7 +94,8 @@ class Console:
                 else:
                     state -= 1
 
-
+"""
+/**
 def main():
     # Example usages
     c = Console(">>> ")
@@ -124,3 +128,5 @@ def valid_test_example(x):
 
 if __name__ == "__main__":
     main()
+**/
+"""

@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+# -*- coding: UTF-8 -*-
 """
 Configuration class holds settings loaded from a JSON file (or uses
 defaults). Settings contain important paths that are used throughout
@@ -12,6 +14,8 @@ import os
 import sys
 import json
 import logging
+
+from pdata import getrandname
 
 logging.basicConfig(
     filename="log",
@@ -42,36 +46,38 @@ class Config():
     """This class holds config data, paths to important files etc."""
 
     # XXX REMEMBER to put every new config option in here. XXX #
-    defaults = {"rootdir": "/srv/sshchan",
-                "boardlist_path": "/srv/sshchan/boardlist",
-                "postnums_path": "/srv/sshchan/postnums",
-                "motd_path": "/srv/sshchan/motd",
-                "version": "0.1",
-                "name": "sshchan",
-                "prompt": "sshchan",
-                "display_legacy": "False"}
+    defaults = {"rootdir": "/srv/chan",
+                "boardlist_path": "/srv/chan/boardlist",
+                "postnums_path": "/srv/chan/postnums",
+                "motd_path": "/srv/chan/motd",
+                "version": "0.0",
+                "name": "toLang(es_ES).beta",
+                "prompt": "@Chan",
+                "port_ssh": "22",
+                "display_legacy": "True"}
 
     def __init__(self, cfg_path=""):
         # Find config file.
 
         self.path = self.look_for_config(
             cfg_path,
-            os.getcwd() + "/sshchan.conf",
-            os.getenv('HOME', default="~") + "/sshchan.conf",
-            "/etc/sshchan.conf")
+            os.getcwd() + "/atchan.conf",
+            os.getenv('HOME', default="~") + "/atchan.conf",
+            "/etc/atchan.conf")
 
-        self.root = self.get_cfg_opt("rootdir", "/srv/sshchan", fatal=True)
+        self.root = self.get_cfg_opt("rootdir", "/srv/chan", fatal=True)
         self.boardlist_path = self.get_cfg_opt(
             "boardlist_path", self.root + "/boardlist")
         self.postnums_path = self.get_cfg_opt(
             "postnums_path", self.root + "/postnums")
         self.version = self.get_cfg_opt("version", "0.0")
         self.motd = self.get_cfg_opt("motd_path", "/etc/motd")
-        self.server_name = self.get_cfg_opt("name", "an sshchan server")
-        self.username = os.getenv("USERNAME", default="anonymous")
+        self.port_ssh = self.get_cfg_opt("port_ssh", "22")
+        self.server_name = self.get_cfg_opt("name", "toLang(es_Es).beta")
+        self.username = os.getenv("USERNAME", default=getrandname()) #default="anonymous")
         self.max_boards = 10  # How many boards can be displayed in top bar.
-        self.display_legacy = self.get_cfg_opt("display_legacy", "False")
-        self.prompt = self.get_cfg_opt("prompt", "sshchan")
+        self.display_legacy = self.get_cfg_opt("display_legacy", "True")
+        self.prompt = self.get_cfg_opt("prompt", "@Chan")
         # self.admin = settings["admin"]
         # self.salt = settings["salt"]
         # self.passwd = settings["password"]
@@ -96,8 +102,8 @@ class Config():
                 continue
 
         # If no config file coud be found
-        print(Colors.bRED + '[FATAL] Config file could not be found.' +
-              Colors.BLACK)
+        print(Colors.bRED + '[FATAL] No se pudo encontrar el archivo de configuracion.' +
+              Colors.BLACK) # [FATAL] Config file could not be found.
         sys.exit(1)
 
     def get_cfg_opt(self, opt_name, default, fatal=False):
@@ -114,9 +120,9 @@ class Config():
         except KeyError:
             if fatal:
                 print(
-                    Colors.bRED + "[FATAL] Config option \'{0}\' could \
-                            not be found in file \'{1}\'.".format
-                    (opt_name, self.path) + Colors.BLACK)
+                    Colors.bRED + "[FATAL] La opcion de configuracion \'{0}\' no se pudo \
+                            encontrar en el archivo \'{1}\'.".format
+                    (opt_name, self.path) + Colors.BLACK) # [FATAL] Config option \++\ could not be found in file 
                 sys.exit(1)
             else:
                 logging.warning(

@@ -1,3 +1,5 @@
+**FORK from [einchan/sshchan](https://github.com/einchan/sshchan/)**
+
 # SSHCHAN
 The server software that runs [ein.blue](http://ein.blue).
 Thanks to Chibi and all the original contributors!
@@ -21,6 +23,8 @@ That should set up the basic chan for you. From there, read the documentation [`
 
 ### gui status
 GUI will require `urwid` module, which is a third-party module. It can be obtained from https://pypi.python.org/pypi/urwid.
+
+	pip3 install urwid
 
 Configuration
 ---

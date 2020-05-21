@@ -1,9 +1,19 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
+# -*- coding: UTF-8 -*-
+#!/usr/bin/python3
+#qpy:console
 """
 Setup script to create everything needed for a working textboard.
 
 Copyright (c) 2015 makos <https://github.com/makos>
 under GNU GPL v3, see LICENSE for details
+"""
+"""
+$ git clone http://neetco.de/chibi/sshchan.git sshchan
+$ wget -c "https://github.com/einchan/sshchan/tarball/master" -O "sshchan.tar.gz"
+
+# Install python3
+$ pip3 install urwid
 """
 
 import json
@@ -28,7 +38,7 @@ or create it yourself!" + c.BLACK)
     else:
         return True
 
-root = input("Specify the root directory (e.g. /home/user/sshchan) ")
+root = input("Specify the root directory (e.g. /home/user/atchan) ")
 boardlist = input(
     "Specify boardlist file path (or leave blank to use default) ")
 postnums = input("Specify postnums file path (or leave blank) ")
@@ -81,6 +91,8 @@ defaults = {"rootdir": os.path.abspath(root),
             "postnums_path": os.path.abspath(postnums),
             "motd_path": os.path.abspath(motd),
             "version": "0.1",
+            "port_ssh": "22",
+            "prompt": "@Chan",
             "name": name,
             "display_legacy": "true"
             # "admin": user,
@@ -90,13 +102,13 @@ defaults = {"rootdir": os.path.abspath(root),
 
 # If rootdir is non-standard, create the config file in it and use that.
 if root != Config.defaults["rootdir"]:
-    conf_path = os.path.join(root, "sshchan.conf")
+    conf_path = os.path.join(root, "atchan.conf")
     with open(conf_path, 'w') as f:
         json.dump(defaults, f, indent=4)
     cfg = Config(conf_path)
 else:
     # Or just go with default /etc/sshchan.conf.
-    with open("/etc/sshchan.conf", 'w') as f:
+    with open("/etc/atchan.conf", 'w') as f:
         json.dump(defaults, f, indent=4)
     cfg = Config()
 

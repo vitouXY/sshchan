@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+# -*- coding: UTF-8 -*-
 """
 Board class allows operation on a board, like posting, creating threads etc.
 If it is instantiated with name parameter that isn't found in boardlist
@@ -17,6 +19,8 @@ import time
 import re
 
 from config import Colors
+
+from pdata import getrandname
 
 logging.basicConfig(
     filename="log",
@@ -61,7 +65,7 @@ class Board():
             desc = boardlist[board]
             postnum = postnums[board]
             list_string += "/{0}/".format(board).ljust(12) + \
-                "{0}".format(desc) + "{0} posts\n".format(postnum).rjust(12)
+                "{0}".format(desc) + "{0} posts\n".format(postnum).rjust(12) # {0} posts
         return list_string
 
     def add_board(self):
@@ -205,7 +209,7 @@ number." + self.c.BLACK)
         board = self.convert_board_name(board)
         _index_path = os.path.join(self.config.root, "boards", board, "index")
         if not os.path.exists(_index_path):
-            print(self.c.RED + 'Board /' + self.name + '/ does not exist.' + self.c.BLACK)
+            print(self.c.RED + 'Tablon /' + self.name + '/ no existe.' + self.c.BLACK) # Board /++/ does not exist.
             self.name = '' 
             self.thread = 0
             return False
@@ -241,7 +245,8 @@ number." + self.c.BLACK)
                         return index_page.index(thread)
         return -1 
 
-    def add_post(self, post_text, name="Anonymous", subject="", thread_id=-1):
+    #def add_post(self, post_text, name="Anonymous", subject="", thread_id=-1):
+    def add_post(self, post_text, name=getrandname(), subject="", thread_id=-1):
         """Posts a thread or a reply to a thread.
 
         If thread_id is not specified (i.e. = -1), a new thread
@@ -308,7 +313,7 @@ number." + self.c.BLACK)
         index = self.get_index()
         thread_index = self.thread_exists(post_id)
         if thread_index == -1:
-            print(self.c.RED + "Could not find post." + self.c.BLACK)
+            print(self.c.RED + "No se pudo encontrar la publicacion." + self.c.BLACK) # Could not find post.
             return False
         else:
             thread = index[thread_index]
@@ -323,15 +328,15 @@ number." + self.c.BLACK)
                 post_text = post[3]
 
             if this_post_id == post_id:
-                print(self.c.YELLOW + "Deleting post:\n" + self.c.BLACK + \
-                "Post no.: " + str(this_post_id) + "\n" + \
-                "Post content:\n" + post_text[:500] + "\n")
-                answer = str(input(self.c.GREEN + "y" + self.c.BLACK + "/" + \
-                         self.c.RED + "n" + self.c.BLACK + "? "))
+                print(self.c.YELLOW + "Eliminando publicacion:\n" + self.c.BLACK + \
+                "No. de publicacion: " + str(this_post_id) + "\n" + \
+                "Contenido de la publicacion:\n" + post_text[:500] + "\n") # Deleting post: ++ Post no.: ++ Post content:
+                answer = str(input(self.c.GREEN + "s" + self.c.BLACK + "/" + \
+                         self.c.RED + "n" + self.c.BLACK + "? ")) # y n
 
-                if answer != "y":
-                    print(self.c.YELLOW + "Deletion aborted." + self.c.BLACK)
-                    return False 
+                if answer != "s": # y
+                    print(self.c.YELLOW + "Eliminacion abortada.." + self.c.BLACK) # Deletion aborted.
+                    return False
 
                 if x == 2: # If it is the OP post, delete the entire thread
                     del index[thread_index]
@@ -339,5 +344,7 @@ number." + self.c.BLACK)
                     del index[thread_index][x]
 
                 self.set_index(index)
-                print(self.c.GREEN + "Post removed successfully." + self.c.BLACK)
+                print(self.c.GREEN + "Publicacion eliminada con éxito." + self.c.BLACK) # Post removed successfully.
                 break
+
+
